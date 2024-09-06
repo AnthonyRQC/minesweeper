@@ -230,10 +230,15 @@ class MinesweeperAI():
 
             if sentence_safes_set and not sentence_safes_set.issubset(safes):
                 knowledge_added = True
-                self.mark_safe(sentence_safes_set)
+                # hacer un loop de los safes y los mines y marcar cada uno como safe
+                for safe in sentence_safes_set:
+                    self.mark_safe(safe)
+
             if sentence_mines_set and not sentence_mines_set.issubset(mines):
                 knowledge_added = True
-                self.mark_mine(sentence_mines_set)
+                for mine in sentence_mines_set:
+                    self.mark_mine(mine)
+
 
 
         for sent in self.knowledge:
@@ -253,20 +258,13 @@ class MinesweeperAI():
                     if new_sentence not in self.knowledge:
                         knowledge_added = True
                         self.knowledge.append(new_sentence)
+        
+        # Print out AI current knowledge to terminal:
+        print('Current AI KB length: ', len(self.knowledge))
+        print('Known Mines: ', self.mines)
+        print('Safe Moves Remaining: ', self.safes - self.moves_made)
+        print('====================================================')
             
-        # las funciones intersection() y difference() pueden ser de mucha ayuda
-        # usarlo para la inferencia
-
-
-
-
-        # loop en self.knowlege y ver si con lo agregado se puede determinar mas knowleges
-            # si en base a los nuevos knowleges se encuentran mas 
-            # estos deben ser agregados 
-            # esto puede ser un loop de nuevos knowleges y deben ser agregados
-            # y si agregas un nuevo knowlege se deberia volver a llamar todo recursivamente    
-
-
 
 
     def make_safe_move(self):
@@ -278,9 +276,9 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        safe_moves = self.moves_made.difference(self.safes)
+        safe_moves = self.safes - self.moves_made
         if safe_moves:
-            return safe_moves[0]
+            return random.choice(list(safe_moves))
         return None
     
     def make_random_move(self):
