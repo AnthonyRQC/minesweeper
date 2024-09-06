@@ -225,8 +225,8 @@ class MinesweeperAI():
             mines = self.mines.copy()
 
         for sentence in self.knowledge:
-            sentence_mines_set = sentence.known_mines()
-            sentence_safes_set = sentence.known_safes()
+            sentence_mines_set = sentence.known_mines().copy()
+            sentence_safes_set = sentence.known_safes().copy()
 
             if sentence_safes_set and not sentence_safes_set.issubset(safes):
                 knowledge_added = True
