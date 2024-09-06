@@ -201,14 +201,15 @@ class MinesweeperAI():
                 if (i, j) == cell:
                     continue
 
-                # fggggg
+                # neighbor in board
                 if 0 <= i < self.height and 0 <= j < self.width:
                     if count == 0:
                         self.mark_safe((i, j))
                         continue
-                    # ver si aqui se puede separar self.mines 
+                    # ignore safes and mines
                     if (i, j) in self.safes:
                         continue
+                    # if cell is known as mine ignore it and reduce 1 count
                     if (i, j) in self.mines:
                         count -= 1
                         
@@ -217,8 +218,47 @@ class MinesweeperAI():
         new_sentence = Sentence(neightbors_set, count)
         self.knowledge.append(new_sentence)
 
+        knowledge_added =  True
+        while knowledge_added:
+            knowledge_added = False
+            safes = self.safes.copy()
+            mines = self.mines.copy()
+
         for sentence in self.knowledge:
-            pass
+            sentence_mines_set = sentence.known_mines()
+            sentence_safes_set = sentence.known_safes()
+
+            if sentence_safes_set and not sentence_safes_set.issubset(safes):
+                knowledge_added = True
+                self.mark_safe(sentence_safes_set)
+            if sentence_mines_set and not sentence_mines_set.issubset(mines):
+                knowledge_added = True
+                self.mark_mine(sentence_mines_set)
+
+
+        for sent in self.knowledge:
+            for sentence in self.knowledge:
+                if sent.cells == sentence.cells:
+                        continue
+
+                if sent.cells == set() and sent.count > 0:
+                    print('sentence with no cells and count created')
+                    raise ValueError
+                if sent.cells.issubset(sentence.cells):
+                    new_sentence_cells = sentence.cells - sent.cells
+                    new_sentence_count = sentence.count - sent.count
+
+                    new_sentence = Sentence(new_sentence_cells, new_sentence_count)
+
+                    if new_sentence not in self.knowledge:
+                        knowledge_added = True
+                        self.knowledge.append(new_sentence)
+            
+        # las funciones intersection() y difference() pueden ser de mucha ayuda
+        # usarlo para la inferencia
+
+
+
 
         # loop en self.knowlege y ver si con lo agregado se puede determinar mas knowleges
             # si en base a los nuevos knowleges se encuentran mas 
@@ -238,8 +278,11 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        raise NotImplementedError
-
+        safe_moves = self.moves_made.difference(self.safes)
+        if safe_moves:
+            return safe_moves[0]
+        return None
+    
     def make_random_move(self):
         """
         Returns a move to make on the Minesweeper board.
@@ -247,4 +290,11 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        raise NotImplementedError
+        moves = []
+        for i in range(self.height):
+            for j in range(self.width):
+                if (i, j) not in self.moves_made and (i, j) not in self.mines:
+                    moves.append((i, j))
+        if not moves:
+            return None
+        return random.choice(moves)
