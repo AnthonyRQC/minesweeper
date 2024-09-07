@@ -203,7 +203,8 @@ class MinesweeperAI():
 
                 # neighbor in board
                 if 0 <= i < self.height and 0 <= j < self.width:
-                    if count == 0:
+                    # add all neightbors to safe
+                    if count == 0 and (i, j) not in self.mines:
                         self.mark_safe((i, j))
                         continue
                     # ignore safes and mines
@@ -212,6 +213,7 @@ class MinesweeperAI():
                     # if cell is known as mine ignore it and reduce 1 count
                     if (i, j) in self.mines:
                         count -= 1
+                        continue
                         
                     neightbors_set.add((i, j))
 
@@ -238,6 +240,8 @@ class MinesweeperAI():
                 knowledge_added = True
                 for mine in sentence_mines_set:
                     self.mark_mine(mine)
+                    # ver que pasa xd
+                    # count -= 1
 
 
 
@@ -278,7 +282,9 @@ class MinesweeperAI():
         """
         safe_moves = self.safes - self.moves_made
         if safe_moves:
-            return random.choice(list(safe_moves))
+            safe_move_selected = random.choice(list(safe_moves))
+            print(f'making safe move chosing: {safe_move_selected}')
+            return safe_move_selected
         return None
     
     def make_random_move(self):
